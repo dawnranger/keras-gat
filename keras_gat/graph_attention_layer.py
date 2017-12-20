@@ -99,13 +99,13 @@ class GraphAttention(Layer):
             # Attention head
             dense = K.squeeze(K.dot(combination_slices, attention_kernel), -1)  # a(Wh_i, Wh_j) in the paper (N x N x 1)
 
+            # add nonlinearty
+            dense = LeakyReLU(alpha=0.2)(dense)
+            
             # Mask values before activation (Vaswani et al., 2017)
             comparison = tf.equal(A, tf.constant(0, dtype=tf.float32))
             mask = tf.where(comparison, tf.ones_like(A) * -10e9, tf.zeros_like(A))
             masked = dense + mask
-
-            # add nonlinearty
-            masked = LeakyReLU(alpha=0.2)(masked)
 
             # Feed masked values to softmax
             softmax = K.softmax(masked)  # (N x N)
