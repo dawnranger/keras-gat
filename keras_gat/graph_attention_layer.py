@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from keras import backend as K
 import tensorflow as tf
 from keras.engine.topology import Layer
-from keras.layers import constraints, regularizers, initializers, activations, Dropout
+from keras.layers import constraints, regularizers, initializers, activations, Dropout, LeakyReLU
 
 
 class GraphAttention(Layer):
@@ -103,6 +103,9 @@ class GraphAttention(Layer):
             comparison = tf.equal(A, tf.constant(0, dtype=tf.float32))
             mask = tf.where(comparison, tf.ones_like(A) * -10e9, tf.zeros_like(A))
             masked = dense + mask
+
+            # add nonlinearty
+            masked = LeakyReLU(alpha=0.2)(masked)
 
             # Feed masked values to softmax
             softmax = K.softmax(masked)  # (N x N)
